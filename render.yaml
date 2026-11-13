@@ -1,0 +1,33 @@
+# Render blueprint: two web services from one repo (College portal and SpareGPU). Delete the one you do not need.
+# Free plan = disk is wiped on every restart/deploy (see README). A persistent disk needs a paid plan.
+services:
+  - type: web
+    name: sparegpu
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py --portal exchange
+    healthCheckPath: /login
+    envVars:
+      - key: GPUSCHED_TZ
+        value: Asia/Kolkata
+      - key: GPUSCHED_ADMIN_PASSWORD
+        sync: false            # set a strong value in the Render dashboard
+      - key: GPUSCHED_SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.4
+  - type: web
+    name: kle-gpu-portal
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py --portal college
+    healthCheckPath: /login
+    envVars:
+      - key: GPUSCHED_TZ
+        value: Asia/Kolkata
+      - key: GPUSCHED_ADMIN_PASSWORD
+        sync: false
+      - key: GPUSCHED_SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: 3.12.4
