@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Requests{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Pending Infrastructure Requests</h1><p class="sub">GPU laptops waiting for approval, and jobs waiting for a GPU.</p></div>
+<div class="cards3">
+  {% for p in pending %}
+  <article class="reqcard">
+    <div class="rq-head"><b>{{ p.name }}</b><span class="pill">{{ p.gpu_count }} GPU{{ '' if p.gpu_count == 1 else 's' }} detected</span></div>
+    <span class="rc-sub">Requested by {{ p.owner }}</span>
+    <dl class="rq-rows">
+      <dt>Registered</dt><dd>{{ p.created_at | dt }}</dd>
+      <dt>Last contact</dt><dd>{{ p.last_seen | dt if p.last_seen else 'never connected' }}</dd>
+      <dt>Runs user code</dt><dd>{{ 'Yes (Docker sandbox)' if p.accepts_scripts else 'No (prepared workloads only)' }}</dd>
+    </dl>
+    <div class="rq-actions">
+      <button type="button" class="btn-dark" data-review="{{ p.provider_id }}" data-name="{{ p.name }}" data-owner="{{ p.owner }}"
+              data-gpus="{{ gpus_by[p.provider_id] | map(attribute='name') | join(', ') or 'none reported yet' }}"
+              data-sandbox="{{ 'Yes (Docker sandbox)' if p.accepts_scripts else 'No (prepared workloads only)' }}">Review &amp; Approve</button>
+      <form method="post" action="{{ url_for('provider_decline', provider_id=p.provider_id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}">
+        <button class="btn-ghost danger">Decline</button></form>
+    </div>
+  </article>
+  {% else %}<div class="empty">No pending provider requests. 🎉</div>{% endfor %}
+</div>
+<h2 class="section">Jobs waiting for a GPU</h2>
+<div class="card">
+  {% if held %}
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th><th>User</th><th>Project</th><th>Memory</th><th>Priority</th><th>Why it is waiting</th></tr></thead>
+    <tbody>{% for j in held %}<tr><td><a href="{{ url_for('job_detail', job_id=j.job_id) }}">{{ j.job_id }}</a></td><td>{{ j.username }}</td><td>{{ j.project_name or '-' }}</td>
+      <td>{{ j.memory_gb }} GB</td><td><span class="prio p{{ j.priority }}">{{ j.priority }}</span></td><td>{{ j.held_reason }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="hint">No jobs are waiting right now.</p>{% endif %}
+</div>
+<dialog id="approve-dialog" class="modal"><form method="post" class="modal-body" id="approve-form">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="approved" value="1"><input type="hidden" name="back" value="{{ request.path }}">
+  <h3>Approve provider</h3><p class="sub">For <b id="ap-name"></b> (owner: <span id="ap-owner"></span>)</p>
+  <table class="kv"><tr><th>GPUs</th><td id="ap-gpus"></td></tr><tr><th>Runs user code</th><td id="ap-sandbox"></td></tr></table>
+  <p class="hint">Once approved, the scheduler can place jobs on these GPUs whenever the laptop is online.</p>
+  <div class="modal-actions"><button type="button" class="btn-ghost" data-close>Cancel</button><button class="btn-dark">Confirm Approval</button></div>
+</form></dialog>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='admin.js') }}"></script>{% endblock %}
