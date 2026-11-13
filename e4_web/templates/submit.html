@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Rent a GPU' if portal == 'exchange' else 'Submit a job' }}{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>{{ 'Rent a GPU' if portal == 'exchange' else 'Request a GPU' }}</h1>
+  {% if portal == 'exchange' %}<p class="hint">Say what you need. SpareGPU picks the best free lender that fits your memory and time. Largest GPU online now: <b>{{ max_gpu }} GB</b>.</p>{% else %}<p class="hint">Describe your project and what it needs. The scheduler turns this into constraints: the GPU must have enough
+     memory and be free, and the provider must be online. If several people ask at once, higher priority goes first.
+     Largest GPU online now: <b>{{ max_gpu }} GB</b> (leave ~0.4 GB for the driver).</p>{% endif %}
+  <form method="post" action="{{ url_for('jobs') }}" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Project name
+      <input name="project_name" maxlength="80" value="{{ form.get('project_name', '') }}" required>
+      {% if errors.project_name %}<span class="err">{{ errors.project_name }}</span>{% endif %}
+    </label>
+    <label>Short description (optional)
+      <textarea name="description" rows="2" maxlength="500">{{ form.get('description', '') or '' }}</textarea>
+      {% if errors.description %}<span class="err">{{ errors.description }}</span>{% endif %}
+    </label>
+    <label>What do you want to run?
+      <select name="kind" id="kind">
+        <option value="template" {{ 'selected' if form.get('kind', 'template') == 'template' }}>A prepared workload</option>
+        <option value="script" {{ 'selected' if form.get('kind') == 'script' }}>My own script (from my Editor project){{ '' if script_ok else ' - no sandboxed provider online' }}</option>
+        <option value="session" {{ 'selected' if form.get('kind') == 'session' }}>Interactive session (terminal on the GPU){{ '' if script_ok else ' - no sandboxed provider online' }}</option>
+      </select>
+    </label>
+    <div id="by-template">
+    <label>Workload
+      <select name="template">
+        {% for key, label in workloads.items() %}
+        <option value="{{ key }}" {{ 'selected' if form.get('template') == key }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.template %}<span class="err">{{ errors.template }}</span>{% endif %}
+    </label>
+    </div>
+    <p id="by-session" class="hint">You get a terminal on the job page for the booked time. Files from your Editor project are copied in; the
+       container has no internet and cannot see the provider's laptop. Copy anything you need to keep from the terminal or logs.</p>
+    <div id="by-script">
+    <label>Script (a file saved in your <a href="{{ url_for('editor') }}">Editor</a> project, e.g. proj/train.py)
+      <input name="script_path" list="myfiles" value="{{ form.get('script_path', '') or '' }}">
+      <datalist id="myfiles">{% for f in files or [] %}<option value="{{ f.path }}">{% endfor %}</datalist>
+      {% if errors.script_path %}<span class="err">{{ errors.script_path }}</span>{% endif %}
+    </label>
+    </div>
+    <label>Framework
+      <select name="framework">
+        <option value="">-</option>
+        {% for f in frameworks %}<option {{ 'selected' if form.get('framework') == f }}>{{ f }}</option>{% endfor %}
+      </select>
+      {% if errors.framework %}<span class="err">{{ errors.framework }}</span>{% endif %}
+    </label>
+    <label>GPU memory needed (GB)
+      <input name="memory_gb" inputmode="decimal" value="{{ form.get('memory_gb', '') }}" required>
+      {% if errors.memory_gb %}<span class="err">{{ errors.memory_gb }}</span>{% endif %}
+    </label>
+    <label>CPU RAM needed (GB, optional)
+      <input name="cpu_ram_gb" inputmode="decimal" value="{{ form.get('cpu_ram_gb', '') or '' }}">
+      {% if errors.cpu_ram_gb %}<span class="err">{{ errors.cpu_ram_gb }}</span>{% endif %}
+    </label>
+    <label>Run time (minutes, e.g. 0.5 = 30 seconds)
+      <input name="duration_min" inputmode="decimal" value="{{ form.get('duration_min', '') }}" required>
+      {% if errors.duration_min %}<span class="err">{{ errors.duration_min }}</span>{% endif %}
+    </label>
+    {% if portal == 'exchange' %}<input type="hidden" name="priority" value="3">{% else %}
+    <label>Priority (1 = lowest, 5 = highest)
+      <input name="priority" inputmode="numeric" value="{{ form.get('priority', '') }}" required>
+      {% if errors.priority %}<span class="err">{{ errors.priority }}</span>{% endif %}
+    </label>
+    {% endif %}
+    {% if portal == 'exchange' %}<label>Most you will pay ({{ currency }} per hour, empty = no limit)
+      <input name="max_price_per_hour" inputmode="decimal" value="{{ form.get('max_price_per_hour', '') or '' }}">
+      {% if errors.max_price_per_hour %}<span class="err">{{ errors.max_price_per_hour }}</span>{% endif %}
+    </label>{% endif %}
+    {% if portal != 'exchange' %}
+    <label>Deadline (optional, for your own record; it does not change scheduling)
+      <input name="deadline" type="datetime-local" value="{{ form.get('deadline', '') or '' }}">
+      {% if errors.deadline %}<span class="err">{{ errors.deadline }}</span>{% endif %}
+    </label>
+    {% endif %}
+    <button class="primary">{{ 'Rent' if portal == 'exchange' else 'Submit request' }}</button>
+  </form>
+</section>
+{% endblock %}
