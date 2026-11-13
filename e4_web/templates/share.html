@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Share my GPU{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Share my GPU</h1>
+  <p class="hint">Lend your idle laptop GPU for free or at a rate you list. You decide the price, the hours, and who may use it. You can pause or stop sharing at any moment.
+     Renters' code always runs inside a locked-down Docker container.</p>
+  {% if token %}
+  <div class="flash ok">Laptop added. Copy this token now, it is shown only once:<br><code>{{ token }}</code><br>
+    On the laptop run: <code>python -m e3_runtime.agent --server http://SERVER:{{ port }} --token {{ token }} --docker</code></div>
+  {% endif %}
+  <table><thead><tr><th>Laptop</th><th>Price</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for p in providers %}<tr><td>{{ p.name }}</td><td>{% if p.price_per_hour == 0 %}<span class="pricetag free">Free</span>{% else %}{{ '%g' % p.price_per_hour }} {{ currency }}/h{% endif %}</td>
+    <td><span class="badge {{ 'free' if p.online and p.sharing_enabled else 'removed' }}">{{ 'sharing' if p.online and p.sharing_enabled else ('paused' if not p.sharing_enabled else 'offline') }}</span></td>
+    <td><a class="btn-sm" href="{{ url_for('share_manage', provider_id=p.provider_id) }}">Manage</a></td></tr>
+  {% else %}<tr><td colspan="4">You have not added a laptop yet.</td></tr>{% endfor %}
+  </tbody></table>
+  <h2>Add a laptop</h2>
+  <form method="post" action="{{ url_for('share') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Name <input name="name" maxlength="40" placeholder="omkar-laptop" required></label>
+    <label>Price ({{ currency }} per hour, 0 = free) <input name="price_per_hour" inputmode="decimal" value="0"></label>
+    <label>Available from (HH:MM, empty = always) <input name="avail_from" placeholder="22:00"></label>
+    <label>Available until <input name="avail_to" placeholder="07:00"></label>
+    <label class="chk"><input type="checkbox" name="private_only"> Private: only me and my trusted users</label>
+    <label>Short description <input name="description" maxlength="200" placeholder="RTX 3050 laptop, free at night"></label>
+    <button class="primary">Add laptop</button>
+  </form>
+</section>
+{% endblock %}
