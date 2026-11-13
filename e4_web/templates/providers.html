@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Providers{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>GPU providers</h1>
+  <p class="hint">A provider is a laptop with a GPU that has joined the platform. Register yours, start the agent with the token,
+     and wait for the admin to approve it.</p>
+  {% if token %}
+  <div class="flash ok">Provider created. Copy this token now, it is shown only once:<br><code>{{ token }}</code></div>
+  {% endif %}
+  <table>
+    <thead><tr><th>Name</th><th>Owner</th><th>GPUs</th><th>Approved</th><th>Online</th><th>Own scripts</th>{% if user.role == 'admin' %}<th></th>{% endif %}</tr></thead>
+    <tbody>
+    {% for p in public_view %}
+      <tr>
+        <td>{{ p.name }}</td><td>{{ p.owner }}</td><td>{{ p.gpu_count }}</td>
+        <td><span class="badge {{ 'free' if p.approved else 'held' }}">{{ 'yes' if p.approved else 'pending' }}</span></td>
+        <td><span class="badge {{ 'free' if p.online else 'removed' }}">{{ 'online' if p.online else 'offline' }}</span></td>
+        <td>{{ 'allowed' if p.accepts_scripts else 'off' }}</td>
+        {% if user.role == 'admin' %}<td>
+          <form method="post" action="{{ url_for('provider_approve', provider_id=p.provider_id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="approved" value="{{ 0 if p.approved else 1 }}"><input type="hidden" name="back" value="{{ request.path }}">
+            <button>{{ 'Suspend' if p.approved else 'Approve' }}</button>
+          </form></td>{% endif %}
+      </tr>
+    {% else %}<tr><td colspan="7">No providers yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <h2>Register my laptop</h2>
+  <form method="post" action="{{ url_for('providers') }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Provider name <input name="name" maxlength="40" placeholder="omkar-laptop" required></label>
+    <button class="primary">Register</button>
+  </form>
+</section>
+{% endblock %}
