@@ -1,0 +1,15 @@
+{# shared pieces for the admin dashboard and fleet pages #}
+{% macro ring(percent) -%}
+<div class="ring {{ 'hot' if percent >= 100 else ('mid' if percent >= 60 else 'ok') }}" style="--p:{{ percent }}" role="img" aria-label="{{ percent }} percent allocated"><span>{{ percent }}%</span></div>
+{%- endmacro %}
+{% macro chips(gpus) -%}
+<div class="chips">
+{% for x in gpus %}
+  <button type="button" class="chip {{ 'off' if not x.online else ('busy' if x.busy else 'free') }}"
+          data-gpu="{{ x.name }}" data-mem="{{ x.memory_gb }}" data-state="{{ 'offline' if not x.online else ('busy' if x.busy else 'free') }}"
+          data-user="{{ x.username or '' }}" data-job="{{ x.job_id or '' }}" data-left="{{ ((x.end_time - now_ts()) | int) if x.end_time else '' }}"
+          data-util="{{ x.util_pct | round(0) | int if x.util_pct is not none else '' }}" data-used="{{ x.mem_used_mb | round(0) | int if x.mem_used_mb is not none else '' }}"
+          title="GPU {{ loop.index }}: {{ 'offline' if not x.online else ('allocated' if x.busy else 'available') }}"><i></i>{{ loop.index }}</button>
+{% endfor %}
+</div>
+{%- endmacro %}
