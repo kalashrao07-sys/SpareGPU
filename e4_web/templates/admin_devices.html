@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}GPU management{% endblock %}
+{% block content %}
+<div class="page-head"><h1>GPU management</h1>
+<p class="sub">Servers and the GPUs on them. A GPU is only "available" while its worker is really connected; otherwise it shows offline and gets no jobs.</p></div>
+
+{% if token %}
+<div class="flash ok">Server <b>{{ new_server }}</b> registered. Copy this agent token now, it is shown only once:<br><code>{{ token }}</code>
+<br>On that machine run: <code>python -m e3_runtime.agent --server http://SERVER_ADDRESS:5000 --token {{ token }}</code></div>
+{% endif %}
+
+<div class="card"><h2>GPUs</h2><div class="tablewrap"><table>
+  <thead><tr><th>#</th><th>GPU model</th><th>Server</th><th>Memory</th><th>State</th><th>Utilisation</th><th>Running job</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for g in gpus %}
+    <tr>
+      <td>{{ g.gpu_id }}</td>
+      <td><b>{{ g.name }}</b>{% if g.is_simulated %} <span class="badge sim">simulated</span>{% endif %}</td>
+      <td>{{ g.provider_name or 'Server (local)' }}</td>
+      <td>{{ g.memory_gb }} GB</td>
+      <td><span class="badge {{ g.cls }}">{{ g.state }}</span></td>
+      <td>{% if g.live and g.util_pct is not none %}{{ g.util_pct|round|int }}% &middot; {{ (g.mem_used_mb/1024)|round(1) }} / {{ g.memory_gb }} GB{% else %}<span class="hint">no live data</span>{% endif %}</td>
+      <td>{% if g.run_job_id %}#{{ g.run_job_id }} {{ g.run_username }}{% else %}-{% endif %}</td>
+      <td class="actions">
+        <form method="post" action="{{ url_for('admin_update_gpu', gpu_id=g.gpu_id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}">
+          <input class="mini" name="name" value="{{ g.name }}" aria-label="model" required>
+          <input class="mini" name="memory_gb" value="{{ g.memory_gb }}" size="4" aria-label="memory GB" required><button class="btn-ghost">Save</button></form>
+        {% if g.status == 'active' %}
+        <form method="post" action="{{ url_for('admin_remove_gpu', gpu_id=g.gpu_id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}"><button class="btn-ghost danger">Disable</button></form>
+        {% else %}
+        <form method="post" action="{{ url_for('admin_restore_gpu', gpu_id=g.gpu_id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}"><button class="btn-ghost">Enable</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="8" class="hint">No GPUs yet. Add a server below.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p class="hint">Disable keeps the record but stops scheduling on it (refused while a job runs on it). When a worker connects it reports the real model and memory, which replace what was typed here.</p>
+</div>
+
+<div class="card"><h2>Servers</h2><div class="tablewrap"><table>
+  <thead><tr><th>Server</th><th>GPUs</th><th>Worker</th><th>Runs user code</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for p in servers %}
+    <tr>
+      <td><b>{{ p.name }}</b></td><td>{{ p.gpu_count }}</td>
+      <td><span class="badge {{ 'free' if p.online else 'held' }}">{{ 'online' if p.online else 'offline' }}</span></td>
+      <td>{{ 'yes' if p.accepts_scripts else 'no' }}</td>
+      <td class="actions">
+        <form method="post" action="{{ url_for('provider_approve', provider_id=p.provider_id) }}" class="inline">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}">
+          <input type="hidden" name="approved" value="{{ 0 if p.approved else 1 }}"><button class="btn-ghost">{{ 'Suspend' if p.approved else 'Activate' }}</button></form>
+        <form method="post" action="{{ url_for('provider_decline', provider_id=p.provider_id) }}" class="inline" onsubmit="return confirm('Remove this server and its GPUs?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="back" value="{{ request.path }}"><button class="btn-ghost danger">Remove</button></form>
+      </td>
+    </tr>
+  {% else %}<tr><td colspan="5" class="hint">No servers yet.</td></tr>{% endfor %}
+  </tbody></table></div>
+  <p class="hint">A server that has already run jobs cannot be removed (history is kept); suspend it instead.</p>
+  <h2>Add a server</h2>
+  <form method="post" action="{{ url_for('admin_add_server') }}" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="name" placeholder="server name, e.g. omkar-laptop" required>
+    <input name="gpu_name" placeholder="GPU model, e.g. RTX 2050" required>
+    <input name="memory_gb" placeholder="memory GB, e.g. 4" required>
+    <button class="btn-dark">Add server</button>
+  </form>
+</div>
+{% endblock %}
