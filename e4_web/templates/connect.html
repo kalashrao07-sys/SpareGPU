@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Connect{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Connect to this platform</h1>
+  <p class="hint">Use one of these addresses from another device or from a provider's laptop. For access from different networks,
+     install <b>Tailscale</b> on every laptop (free, private, encrypted) and use the <b>Tailscale</b> address. Never open this port on your router.</p>
+  <table>
+    <thead><tr><th>Address</th><th>Type</th></tr></thead>
+    <tbody>
+    {% for a in addrs %}<tr><td><code>http://{{ a.ip }}:{{ port }}</code></td><td>{{ a.kind }} <span class="hint">({{ a.iface }})</span></td></tr>
+    {% else %}<tr><td colspan="2">No network address found.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <h2>Provider laptop command</h2>
+  <p><code>python -m e3_runtime.agent --server http://ADDRESS:{{ port }} --token YOUR_TOKEN --docker</code></p>
+  <p class="hint">The token comes from the <a href="{{ url_for('providers') }}">Providers</a> page when you register your laptop.</p>
+</section>
+{% endblock %}
