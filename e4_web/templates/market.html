@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Market{% endblock %}
+{% block content %}
+<h1>GPU market</h1>
+<p class="sub">Idle GPUs that people are sharing. Rates are per hour and are agreed directly with the lender; <span class="pricetag free">Free</span> means no charge.</p>
+<div class="market">
+{% for p in providers %}
+  <article class="mcard {{ 'off' if not p.online or not p.sharing_enabled }}">
+    <header><h2>{{ p.name }}</h2>
+      {% if p.free %}<span class="pricetag free">Free</span>{% else %}<span class="pricetag">{{ '%g' % p.price_per_hour }} {{ currency }}/h</span>{% endif %}</header>
+    <p class="by">by {{ p.owner }}{% if p.private_only %} · <span class="badge held">private</span>{% endif %}</p>
+    {% for x in p.gpus %}<p class="spec">{{ icon('chip', 16) }} {{ x.name }} · {{ x.memory_gb|round|int }} GB</p>{% else %}<p class="spec">{{ icon('chip', 16) }} GPU details appear once the laptop connects</p>{% endfor %}
+    <p class="spec">{{ icon('bolt', 16) }} {% if p.avail_from is none %}Available any time{% else %}Hours {{ '%02d:%02d' % (p.avail_from // 60, p.avail_from % 60) }} to {{ '%02d:%02d' % (p.avail_to // 60, p.avail_to % 60) }}{% endif %}</p>
+    {% if p.description %}<p class="desc">{{ p.description }}</p>{% endif %}
+    <footer>
+      <span class="badge {{ 'free' if p.online and p.sharing_enabled else 'removed' }}">{{ 'online' if p.online and p.sharing_enabled else ('paused' if not p.sharing_enabled else 'offline') }}</span>
+      {% if p.locked %}<span class="hint">Invite only</span>
+      {% elif p.own %}<a class="btn-sm" href="{{ url_for('share_manage', provider_id=p.provider_id) }}">Manage</a>
+      {% else %}<a class="btn-sm" href="{{ url_for('new_job') }}">Rent</a>{% endif %}
+    </footer>
+  </article>
+{% else %}<div class="empty">No GPUs are being shared yet. Be the first: <a href="{{ url_for('share') }}">share yours</a>.</div>{% endfor %}
+</div>
+{% endblock %}
