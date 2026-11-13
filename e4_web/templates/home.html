@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icon %}
+{% block title %}Home{% endblock %}
+{% block bodyclass %}home-page{% endblock %}
+{% block bg %}<canvas id="netbg" aria-hidden="true"></canvas>{% endblock %}
+{% block content %}
+<section class="home">
+  <h1 class="home-title">Welcome, {{ user.username }}</h1>
+  <p class="sub center">{{ online }} GPU node{{ '' if online == 1 else 's' }} online · you have {{ counts.running }} running and {{ counts.waiting }} waiting job{{ '' if counts.waiting == 1 else 's' }}</p>
+  <div class="tiles">
+    {% for e, ic, label, tint in [
+        ('new_job','bolt','Request a GPU','blue'), ('editor','code','Code Editor','teal'),
+        ('jobs','jobs','My Jobs','orange'), ('pool','pool','GPU Pool','red')] %}
+    <a class="tile {{ tint }}" href="{{ url_for(e) }}">
+      <span class="tile-ico">{{ icon(ic, 40) }}</span>
+      <span class="tile-name">{{ label }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='netbg.js') }}"></script>{% endblock %}
