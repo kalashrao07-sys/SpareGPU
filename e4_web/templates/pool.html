@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}GPU pool{% endblock %}
+{% block content %}
+<section class="card" id="pool">
+  <h1>GPU pool</h1>
+  <p class="hint">Jobs waiting: <b id="queue">{{ queue }}</b>. This page refreshes by itself.</p>
+  <table>
+    <thead><tr><th>GPU</th><th>Provider</th><th>Memory</th><th>Status</th><th>Running job</th><th>Live use</th></tr></thead>
+    <tbody id="pool-body">
+    {% for g in gpus %}
+      <tr>
+        <td>{{ g.name }}{% if g.simulated %} <span class="badge sim">simulated</span>{% endif %}</td>
+        <td>{{ g.provider or '-' }} <span class="badge {{ 'free' if g.online else 'removed' }}">{{ 'online' if g.online else 'offline' }}</span></td>
+        <td>{{ g.memory_gb }} GB</td>
+        <td><span class="badge {{ 'running' if g.busy else ('removed' if g.status == 'removed' else 'free') }}">{{ 'busy' if g.busy else ('removed' if g.status == 'removed' else 'free') }}</span></td>
+        <td>{% if g.busy %}{{ g.who }}{% if g.job_id %} · job #{{ g.job_id }}{% endif %}{% if g.free_in_s is not none %} · free in ~{{ g.free_in_s }} s{% endif %}{% else %}-{% endif %}</td>
+        <td>{% if g.util_pct is not none %}{{ g.util_pct | round(0) | int }}% · {{ g.mem_used_mb | round(0) | int }} MB{% else %}-{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
