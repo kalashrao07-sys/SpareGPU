@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}{{ p.name }}{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>{{ p.name }} <span class="badge {{ 'free' if p.online and p.sharing_enabled else 'removed' }}">{{ 'sharing' if p.online and p.sharing_enabled else ('paused' if not p.sharing_enabled else 'offline') }}</span></h1>
+  <div class="killrow">
+    <form method="post" action="{{ url_for('share_pause', provider_id=p.provider_id) }}" class="inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="enabled" value="{{ 0 if p.sharing_enabled else 1 }}">
+      <button>{{ 'Pause sharing' if p.sharing_enabled else 'Resume sharing' }}</button></form>
+    <form method="post" action="{{ url_for('share_stop', provider_id=p.provider_id) }}" class="inline" onsubmit="return confirm('Stop sharing and kill every running job on this laptop?')">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="danger">Stop everything now</button></form>
+  </div>
+  <p class="hint">Pause blocks new bookings and lets running jobs finish. Stop also kills running jobs immediately.</p>
+</section>
+<section class="card">
+  <h2>Terms</h2>
+  <form method="post" action="{{ url_for('share_terms', provider_id=p.provider_id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Price ({{ currency }} per hour, 0 = free) <input name="price_per_hour" inputmode="decimal" value="{{ '%g' % p.price_per_hour }}"></label>
+    <label>Available from <input name="avail_from" placeholder="22:00" value="{{ f(p.avail_from) }}"></label>
+    <label>Available until <input name="avail_to" placeholder="07:00" value="{{ f(p.avail_to) }}"></label>
+    <label class="chk"><input type="checkbox" name="private_only" {{ 'checked' if p.private_only }}> Private: only me and my trusted users</label>
+    <label>Description <input name="description" maxlength="200" value="{{ p.description or '' }}"></label>
+    <button class="primary">Save terms</button>
+  </form>
+</section>
+<section class="card">
+  <h2>Trusted users</h2>
+  <p class="hint">Trusted users use this GPU free of charge and can use it even when it is private.</p>
+  <table><tbody>{% for t in trusted %}<tr><td>{{ t.username }}</td><td>
+    <form method="post" action="{{ url_for('share_trust', provider_id=p.provider_id) }}" class="inline"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="username" value="{{ t.username }}"><input type="hidden" name="remove" value="1"><button>Remove</button></form></td></tr>
+  {% else %}<tr><td>No one yet.</td></tr>{% endfor %}</tbody></table>
+  <form method="post" action="{{ url_for('share_trust', provider_id=p.provider_id) }}" class="inline-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><label>Username <input name="username" required></label><button class="primary">Trust</button></form>
+</section>
+<section class="card"><h2>Earnings</h2>
+  <table><tbody>{% for r in ledger %}<tr><td>{{ r.created_at|dt }}</td><td>{{ r.note }}</td><td>+{{ '%g' % r.amount }}</td></tr>{% else %}<tr><td>No earnings yet.</td></tr>{% endfor %}</tbody></table>
+</section>
+{% endblock %}
