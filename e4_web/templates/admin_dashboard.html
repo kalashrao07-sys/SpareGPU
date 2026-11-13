@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from "_fleet.html" import ring %}
+{% block title %}Dashboard{% endblock %}
+{% block head %}<meta http-equiv="refresh" content="15">{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Dashboard Overview</h1><p class="sub">Central Computing Facility control center. <span class="live"><i></i>Live · refreshes every 15 s</span></p></div>
+<div class="stats">
+  <div class="stat"><span class="label">Pending requests</span><b class="num {{ 'attn' if stats.pending_providers }}">{{ stats.pending_providers }}</b><a class="statlink" href="{{ url_for('admin_requests') }}">View Requests →</a></div>
+  <div class="stat"><span class="label">Active users</span><b class="num">{{ stats.active_users }}</b><a class="statlink blue" href="{{ url_for('jobs') }}">View Jobs →</a></div>
+  <div class="stat"><span class="label">Total GPU assets</span><b class="num">{{ stats.total_gpus }}</b><a class="statlink" href="{{ url_for('admin_devices') }}">Manage Devices →</a></div>
+  <div class="stat"><span class="label">Running · waiting</span><b class="num">{{ stats.running_jobs }}<small> / {{ stats.waiting_jobs }}</small></b><a class="statlink blue" href="{{ url_for('admin_fleet') }}">Open Fleet →</a></div>
+</div>
+<h2 class="section">Resource Allocation Status</h2>
+<div class="cards3">
+  {% for f in fleet %}
+  <a class="ringcard {{ 'dim' if not f.online }}" href="{{ url_for('admin_fleet') }}">
+    {{ ring(f.percent) }}
+    <div><b class="rc-name">{{ f.name }}</b>
+      <span class="rc-line"><b>{{ f.allocated }}</b> Allocated · <b>{{ f.available }}</b> Available</span>
+      <span class="rc-sub">Total GPUs: {{ f.total }} · {{ 'online' if f.online else ('offline' if f.approved else 'awaiting approval') }}</span></div>
+  </a>
+  {% else %}
+  <div class="empty">No GPU laptops have joined yet. Register one on the <a href="{{ url_for('providers') }}">Providers</a> page.</div>
+  {% endfor %}
+</div>
+{% endblock %}
