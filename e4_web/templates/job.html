@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Job {{ job.job_id }}{% endblock %}
+{% block content %}
+<section class="card" id="job" data-job-id="{{ job.job_id }}">
+  <h1>Job #{{ job.job_id }}</h1>
+  <p class="state"><span class="badge {{ job.state }}" data-field="state">{{ job.state }}</span></p>
+  <p data-field="message" class="hint"></p>
+  <table class="kv">
+    <tr><th>Project</th><td>{{ job.project_name or '-' }}{% if job.description %}<br><span class="hint">{{ job.description }}</span>{% endif %}</td></tr>
+    <tr><th>Runs</th><td>{% if job.kind == 'script' %}your script <code>{{ job.script_path }}</code>{% elif job.kind == 'session' %}interactive session{% else %}{{ workloads.get(job.template, job.template) }}{% endif %}{% if job.framework %} · {{ job.framework }}{% endif %}</td></tr>
+    <tr><th>Memory / run time / priority</th><td>{{ job.memory_gb }} GB · {{ job.duration_min }} min · priority {{ job.priority }}</td></tr>
+    <tr><th>Submitted</th><td>{{ job.submitted_at | dt }}</td></tr>
+    <tr><th>Deadline (record only)</th><td>{{ job.deadline or '-' }}</td></tr>
+    <tr><th>GPU</th><td><span data-field="gpu_name">{{ job.gpu_name or '-' }}</span>{% if job.provider_name %} on <b>{{ job.provider_name }}</b>{% endif %}</td></tr>
+    <tr><th>Place in queue</th><td data-field="queue_position">{{ job.queue_position or '-' }}</td></tr>
+    <tr><th>Result</th><td data-field="result_note">{{ job.result_note or '-' }}</td></tr>
+  </table>
+  {% if job.state != 'completed' %}
+  <form method="post" action="{{ url_for('job_stop', job_id=job.job_id) }}" class="inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button>{{ 'Cancel request' if job.state != 'running' else 'Stop job' }}</button>
+  </form>
+  {% endif %}
+  {% if job.kind != 'template' %}
+  <div id="term-box" hidden>
+    <h2>Terminal</h2>
+    <pre id="term" class="log" tabindex="0"></pre>
+    <form id="term-form" class="inline-form" autocomplete="off">
+      <input id="term-input" placeholder="type a command, e.g. nvidia-smi, then Enter" style="flex:1">
+      <button class="primary">Send</button>
+    </form>
+    <p class="hint">Runs inside your sandbox container on the provider's GPU. Line-based: no editors like vim; use the Editor on this site for code.</p>
+  </div>
+  {% endif %}
+  <h2>Live log</h2>
+  <pre id="log" class="log" aria-live="polite"></pre>
+  <p class="hint">Status and log refresh by themselves. Your results are these logs: copy anything you need to keep.</p>
+</section>
+{% endblock %}
