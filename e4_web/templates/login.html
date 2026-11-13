@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block bodyclass %}login-page{% endblock %}
+{% block bg %}<canvas id="netbg" aria-hidden="true"></canvas>{% endblock %}
+{% block header %}
+<header class="login-head">
+  {% if portal == 'exchange' %}<span class="logo brand big"><img src="{{ url_for('static', filename='img/sparegpu_mark.svg') }}" alt="" width="46" height="46"><span>Spare<b>GPU</b></span></span>
+  {% else %}<img src="{{ url_for('static', filename='img/kletech_logo.png') }}" alt="KLE Technological University, Dr. M. S. Sheshgiri Campus, Belagavi">{% endif %}
+</header>
+{% endblock %}
+{% block content %}
+<section class="login-card">
+  {% if portal == 'exchange' %}<h1>Welcome to SpareGPU</h1><p class="sub">Rent a GPU, or lend yours while it sits idle</p>
+  {% else %}<h1>KLETU DrMSS GPU Portal</h1><p class="sub">Book, run and monitor GPU jobs</p>{% endif %}
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input class="pill-input" name="username" placeholder="Username" aria-label="Username" autocomplete="username" required autofocus>
+    <input class="pill-input" name="password" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+    <button class="btn-green">Sign in</button>
+  </form>
+  {% if portal == 'exchange' %}<p class="foot">New here? <a href="{{ url_for('register') }}">Create a free account</a></p>
+  {% else %}<p class="foot">Central Computing Facility · KLE Technological University</p>{% endif %}
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='netbg.js') }}"></script>{% endblock %}
