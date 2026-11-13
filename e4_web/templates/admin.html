@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>GPU pool configuration</h1>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Memory</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody>
+    {% for g in gpus %}
+      <tr>
+        <td>{{ g.gpu_id }}</td><td>{{ g.name }}{% if g.is_simulated %} <span class="badge sim">simulated</span>{% endif %}</td>
+        <td>{{ g.memory_gb }} GB</td>
+        <td><span class="badge {{ 'removed' if g.status == 'removed' else ('running' if g.current_job_id else 'free') }}">{{ 'removed' if g.status == 'removed' else ('busy' if g.current_job_id else 'free') }}</span></td>
+        <td>
+          <form method="post" action="{{ url_for('admin_rename_gpu', gpu_id=g.gpu_id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input name="name" placeholder="new name" size="14"><button>Rename</button>
+          </form>
+          {% if g.status == 'active' %}
+          <form method="post" action="{{ url_for('admin_remove_gpu', gpu_id=g.gpu_id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="danger">Remove from pool</button>
+          </form>
+          {% else %}
+          <form method="post" action="{{ url_for('admin_restore_gpu', gpu_id=g.gpu_id) }}" class="inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button>Put back</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="hint">Real GPUs are discovered automatically when the system starts. A GPU with a running job cannot be removed.
+     {% if not allow_sim %}Adding simulated GPU records is switched off (needs the guide's approval).{% endif %}</p>
+  {% if allow_sim %}
+  <form method="post" action="{{ url_for('admin_add_gpu') }}" class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input name="name" placeholder="name" required><input name="gpu_type" placeholder="type" required>
+    <input name="memory_gb" placeholder="memory GB" required><button>Add simulated GPU</button>
+  </form>
+  {% endif %}
+</section>
+<section class="card">
+  <h1>Held jobs</h1>
+  {% if held %}
+  <table>
+    <thead><tr><th>#</th><th>User</th><th>Memory</th><th>Priority</th><th>Reason</th></tr></thead>
+    <tbody>{% for j in held %}
+      <tr><td>{{ j.job_id }}</td><td>{{ j.username }}</td><td>{{ j.memory_gb }} GB</td><td>{{ j.priority }}</td><td>{{ j.held_reason }}</td></tr>
+    {% endfor %}</tbody>
+  </table>
+  {% else %}<p class="hint">No jobs are held right now.</p>{% endif %}
+</section>
+{% endblock %}
