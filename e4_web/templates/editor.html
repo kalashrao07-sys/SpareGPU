@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Code editor{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='editor.css') }}">
+<!-- A lightweight VS Code-style workspace: explorer (files and folders), tabs, editor, and an output/terminal panel.
+     All behaviour is in static/editor.js; the files live on the server (see /api/files) and run on the GPU worker. -->
+<section class="ide" id="editor-app">
+  <div class="ide-top">
+    <div class="ide-run">
+      <button id="run-btn" type="button" class="run" title="Save all and run the open file on a GPU (Ctrl+Enter)">&#9654; Run</button>
+      <button id="stop-btn" type="button" class="stop" title="Stop the running job" disabled>&#9632; Stop</button>
+      <label>GPU memory (GB) <input id="mem" type="number" min="0.5" step="0.5" value="1"></label>
+      <label>Time limit (min) <input id="mins" type="number" min="1" max="{{ 60 }}" value="5"></label>
+    </div>
+    <span id="gpu-chip" class="chip" title="Live GPU availability">checking GPU&hellip;</span>
+    <span class="spacer"></span>
+    <a class="small-link" href="/api/files/backup.zip">Download backup (.zip)</a>
+  </div>
+  <div class="ide-body">
+    <aside class="explorer" aria-label="Explorer">
+      <div class="ex-head"><span>EXPLORER</span>
+        <span class="ex-tools">
+          <button id="new-file" type="button" title="New file">+ File</button>
+          <button id="new-folder" type="button" title="New folder">+ Folder</button>
+        </span>
+      </div>
+      <div id="tree" class="tree" role="tree"></div>
+    </aside>
+    <div class="ide-main">
+      <div id="tabs" class="tabs" role="tablist"></div>
+      <div class="pane-wrap">
+        <div id="monaco" class="ed-pane"></div>
+        <textarea id="fallback" class="ed-pane" spellcheck="false" hidden></textarea>
+        <div id="empty" class="empty">Open a file from the explorer, or create one with <b>+ File</b>.</div>
+      </div>
+      <div class="panel">
+        <div class="panel-tabs">
+          <button id="tab-out" type="button" class="on">OUTPUT</button>
+          <button id="tab-term" type="button">TERMINAL</button>
+          <span id="job-status" class="job-status"></span>
+          <button id="clear-out" type="button" class="linkish">Clear</button>
+        </div>
+        <pre id="out" class="out" aria-live="polite">Ready. Press Run to execute the open file on the allocated GPU.</pre>
+        <div id="term-wrap" hidden>
+          <pre id="term" class="out" tabindex="0"></pre>
+          <form id="term-form" autocomplete="off">
+            <span class="prompt">$</span><input id="term-input" placeholder="type a command, e.g. nvidia-smi, then Enter" disabled>
+          </form>
+          <button id="term-start" type="button" class="linkish">Start a GPU terminal (uses a GPU session)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<script src="{{ url_for('static', filename='editor.js') }}"></script>
+{% endblock %}
