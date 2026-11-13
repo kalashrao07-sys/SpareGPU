@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_fleet.html" import chips %}
+{% block title %}Fleet{% endblock %}
+{% block head %}<meta http-equiv="refresh" content="15">{% endblock %}
+{% block content %}
+<div class="page-head"><h1>Real-Time Fleet Status</h1><p class="sub">Live overview. <b>Click a GPU</b> to see what is running on it. <span class="live"><i></i>Live</span></p></div>
+<div class="legend"><span class="chip free"><i></i>Available</span><span class="chip busy"><i></i>Allocated</span><span class="chip off"><i></i>Offline</span>
+  <a class="statlink" href="{{ url_for('providers') }}">+ Register a provider</a></div>
+<div class="cards4">
+  {% for f in fleet %}
+  <div class="fleetcard">
+    <div class="fc-head"><b>{{ f.name }}</b>
+      <span class="badge {{ 'free' if f.online else ('held' if not f.approved else 'removed') }}">{{ 'online' if f.online else ('pending' if not f.approved else 'offline') }}</span></div>
+    <span class="rc-sub">Owner: {{ f.owner }}{% if f.provider_id %} · {{ 'sandbox on' if f.accepts_scripts else 'prepared workloads only' }}{% endif %}</span>
+    {{ chips(f.gpus) }}
+    {% if f.provider_id and f.approved %}
+    <form method="post" action="{{ url_for('provider_approve', provider_id=f.provider_id) }}" class="fc-actions">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><input type="hidden" name="approved" value="0">
+      <input type="hidden" name="back" value="{{ request.path }}"><button class="btn-ghost danger">Suspend</button>
+    </form>{% endif %}
+  </div>
+  {% else %}<div class="empty">No GPUs yet.</div>{% endfor %}
+</div>
+<dialog id="gpu-dialog" class="modal"><div class="modal-body">
+  <h3 id="gd-title">GPU</h3><p class="sub" id="gd-sub"></p>
+  <table class="kv"><tr><th>Status</th><td id="gd-state"></td></tr><tr><th>Memory</th><td id="gd-mem"></td></tr>
+    <tr><th>Running job</th><td id="gd-job"></td></tr><tr><th>Live use</th><td id="gd-util"></td></tr></table>
+  <div class="modal-actions"><button type="button" class="btn-ghost" data-close>Close</button></div>
+</div></dialog>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='admin.js') }}"></script>{% endblock %}
