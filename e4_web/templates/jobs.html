@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Jobs{% endblock %}
+{% block content %}
+<div class="page-head"><h1>{{ 'All Jobs' if user.role == 'admin' else 'My Jobs' }}</h1><p class="sub">{{ 'Every request on the platform.' if user.role == 'admin' else 'Your GPU requests and their status.' }}</p></div>
+<div class="card">
+  {% if jobs %}
+  <div class="tablewrap"><table>
+    <thead><tr><th>#</th>{% if user.role == 'admin' %}<th>User</th>{% endif %}<th>Project</th><th>Runs</th><th>Memory</th><th>Time</th><th>Priority</th><th>Status</th></tr></thead>
+    <tbody>
+    {% for j in jobs %}
+      <tr>
+        <td><a href="{{ url_for('job_detail', job_id=j.job_id) }}">{{ j.job_id }}</a></td>
+        {% if user.role == 'admin' %}<td>{{ j.username }}</td>{% endif %}
+        <td>{{ j.project_name or '-' }}</td>
+        <td>{% if j.kind == 'script' %}script <code>{{ j.script_path }}</code>{% elif j.kind == 'session' %}interactive session{% else %}{{ workloads.get(j.template, j.template) }}{% endif %}</td>
+        <td>{{ j.memory_gb }} GB</td><td>{{ j.duration_min }} min</td><td><span class="prio p{{ j.priority }}">{{ j.priority }}</span></td>
+        <td><span class="badge {{ j.state }}">{{ j.state }}</span>{% if j.held_reason %} <span class="hint">{{ j.held_reason }}</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<p class="hint">No jobs yet. <a href="{{ url_for('new_job') }}">Request a GPU</a>.</p>{% endif %}
+</div>
+{% endblock %}
