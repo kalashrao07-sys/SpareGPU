@@ -1,0 +1,25 @@
+/* SpareGPU theme: deep teal + amber, mint-grey page. Loaded after style.css; only overrides variables and a few components. */
+:root{--navy:#0b1f1e;--navy-2:#123533;--page:#f2f7f6;--ink:#0b1f1e;--muted:#5b716f;--line:#dbe7e5;
+  --green:#0f766e;--green-soft:#d9f2ee;--green-btn:#0f766e;--blue:#0f766e;--blue-soft:#d9f2ee;--peach:#e6f5f2;--orange:#0f766e;--amber:#f59e0b;--amber-soft:#fff1d1}
+.btn-green:hover{background:#0b5f59}
+.topbar.light{border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:700;font-size:21px;letter-spacing:-.02em}
+.brand b{color:#0f766e;font-weight:800}.brand.big{font-size:30px;justify-content:center}
+.login-head{background:var(--peach)}
+.login-card h1{color:#0f766e}
+.pillnav a.active{background:#0f766e}
+.credit-pill{display:inline-flex;align-items:center;gap:6px;background:var(--amber-soft);color:#8a5a00;padding:5px 12px;border-radius:999px;font-weight:700;font-size:13px;text-decoration:none;margin-right:10px}
+.pricetag{background:var(--amber-soft);color:#8a5a00;font-weight:700;font-size:13px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.pricetag.free{background:var(--green-soft);color:#0f766e}
+.market{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;margin-top:18px}
+.mcard{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.mcard.off{opacity:.65}.mcard header{display:flex;justify-content:space-between;align-items:center;gap:8px}.mcard h2{margin:0;font-size:18px}
+.mcard .by{margin:0;color:var(--muted);font-size:13px}.mcard .spec{margin:0;display:flex;gap:8px;align-items:center;font-size:14px}
+.mcard .desc{margin:4px 0 0;color:#344054;font-size:13px}.mcard footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:10px}
+.btn-sm{background:#0f766e;color:#fff;text-decoration:none;padding:7px 16px;border-radius:9px;font-weight:700;font-size:14px}
+.btn-sm:hover{background:#0b5f59}
+.killrow{display:flex;gap:10px;margin:12px 0 4px}.danger{background:#c0392b;color:#fff;border:0;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+.bal .num{font-size:44px;font-weight:800;color:#0f766e}.plus{color:#0f766e;font-weight:700}.minus{color:#c0392b;font-weight:700}
+button.danger,.killrow .danger{background:#c0392b!important;color:#fff!important;border:0}
+.chk{display:flex!important;align-items:center;gap:8px;flex-direction:row}.chk input{width:auto!important;margin:0}
+button.primary{background:#0f766e;color:#fff}button.primary:hover{background:#0b5f59}
