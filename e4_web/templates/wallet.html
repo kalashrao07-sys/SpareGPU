@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Wallet{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Wallet</h1>
+  <div class="bal"><span class="num">{{ '%g' % balance }}</span> <span class="hint">{{ currency }}{% if reserved %} · {{ '%g' % reserved }} held for running jobs{% endif %}</span></div>
+  <p class="hint">Credits are virtual points for this demo (no real money). Renting a priced GPU spends credits; lending earns them. Free and trusted GPUs cost nothing.</p>
+  <table><thead><tr><th>When</th><th>What</th><th>Amount</th></tr></thead><tbody>
+  {% for r in ledger %}<tr><td>{{ r.created_at|dt }}</td><td>{{ r.note }}</td><td class="{{ 'plus' if r.amount > 0 else 'minus' }}">{{ '%+g' % r.amount }}</td></tr>
+  {% else %}<tr><td colspan="3">No transactions yet.</td></tr>{% endfor %}</tbody></table>
+</section>
+{% endblock %}
