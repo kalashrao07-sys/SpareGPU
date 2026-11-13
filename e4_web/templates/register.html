@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Create account{% endblock %}
+{% block bodyclass %}login-page{% endblock %}
+{% block bg %}<canvas id="netbg" aria-hidden="true"></canvas>{% endblock %}
+{% block header %}<header class="login-head"><span class="logo brand big"><img src="{{ url_for('static', filename='img/sparegpu_mark.svg') }}" alt="" width="46" height="46"><span>Spare<b>GPU</b></span></span></header>{% endblock %}
+{% block content %}
+<section class="login-card">
+  <h1>Create your account</h1><p class="sub">Rent a GPU or lend yours</p>
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input class="pill-input" name="username" placeholder="Username" value="{{ form.get('username','') }}" autocomplete="username" required autofocus>
+    {% if errors.username %}<span class="err">{{ errors.username }}</span>{% endif %}
+    <input class="pill-input" name="password" type="password" placeholder="Password (8+ characters)" autocomplete="new-password" required>
+    {% if errors.password %}<span class="err">{{ errors.password }}</span>{% endif %}
+    <button class="btn-green">Sign up</button>
+  </form>
+  <p class="foot">Already registered? <a href="{{ url_for('login') }}">Sign in</a></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='netbg.js') }}"></script>{% endblock %}
