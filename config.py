@@ -44,12 +44,12 @@ if os.environ.get("GPUSCHED_TZ") and hasattr(time, "tzset"):
 
 # Seed accounts created by `python -m e2_persistence.seed`. CHANGE THESE before the demo.
 SEED_USERS = [
-    ("admin", os.environ.get("GPUSCHED_ADMIN_PASSWORD", "admin-change-me"), "admin"),
-    ("kalash", "kalash@123", "submitter"),
-    ("komal", "komal@123", "submitter"),
-    ("omkar", "omkar@123", "submitter"),
-    ("bhoomika", "bhoomika@123", "submitter"),
-    ("amey muchandi", os.environ.get("GPUSCHED_PW_PROF", "muchandiamey@123"), "submitter"),
+    ("admin", os.environ.get("GPUSCHED_ADMIN_PASSWORD", "admin@123"), "admin"),
+    ("kalash", os.environ.get("GPUSCHED_PW_KALASH", "kalash@123"), "submitter"),
+    ("komal", os.environ.get("GPUSCHED_PW_KOMAL", "komal@123"), "submitter"),
+    ("omkar", os.environ.get("GPUSCHED_PW_OMKAR", "omkar@123"), "submitter"),
+    ("bhoomika", os.environ.get("GPUSCHED_PW_BHOOMIKA", "bhoomika@123"), "submitter"),
+    ("amey", os.environ.get("GPUSCHED_PW_PROF", "amey@123"), "submitter"),
 ]
 
 # SpareGPU (exchange) settings. Credits are VIRTUAL points, not money: no payment gateway in this version.
