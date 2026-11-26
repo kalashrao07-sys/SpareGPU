@@ -98,7 +98,7 @@ def main():
     repo.init()
     # Create the default demo accounts on first run (skipped for ones that already exist).
     for username, password, role in config.SEED_USERS:
-        if config.BEHIND_PROXY and role != "admin":
+        if config.BEHIND_PROXY and role != "admin" and not config.SEED_ON_HOST:
             continue                               # public host: no default-password demo accounts, people sign up / admin adds them      # first run: create the seed accounts
         try:
             uid = repo.create_user(username, password, role)
