@@ -48,6 +48,7 @@ SEED_USERS = [
     ("komal", "komal@123", "submitter"),
     ("omkar", "omkar@123", "submitter"),
     ("bhoomika", "bhoomika@123", "submitter"),
+    ("amey muchandi", os.environ.get("GPUSCHED_PW_PROF", "muchandiamey@123"), "submitter"),
 ]
 
 # SpareGPU (exchange) settings. Credits are VIRTUAL points, not money: no payment gateway in this version.
