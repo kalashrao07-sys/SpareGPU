@@ -34,6 +34,7 @@ CUDA_OVERHEAD_GB = 0.4      # job scripts keep this much of the declared memory 
 HOST = os.environ.get("GPUSCHED_HOST", "0.0.0.0")   # 0.0.0.0 = reachable from other devices
 PORT = int(os.environ.get("PORT") or os.environ.get("GPUSCHED_PORT", "5000" if PORTAL == "college" else "5100"))   # $PORT is set by Render
 BEHIND_PROXY = bool(os.environ.get("RENDER") or os.environ.get("GPUSCHED_BEHIND_PROXY"))   # HTTPS terminated by the host
+SEED_ON_HOST = bool(os.environ.get("GPUSCHED_SEED_ON_HOST"))   # 1 = also create the team accounts on a public host
 SECURE_COOKIES = BEHIND_PROXY or bool(os.environ.get("GPUSCHED_SECURE_COOKIES"))
 # Availability windows and shown times use this zone (Render runs on UTC). e.g. GPUSCHED_TZ=Asia/Kolkata
 # time.tzset() exists on Linux/macOS (where Render runs) but not on Windows, hence the hasattr guard.
