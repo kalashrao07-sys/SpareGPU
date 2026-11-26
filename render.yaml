@@ -4,6 +4,7 @@ services:
   - type: web
     name: sparegpu
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python run.py --portal exchange
     healthCheckPath: /login
@@ -19,6 +20,7 @@ services:
   - type: web
     name: kle-gpu-portal
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: python run.py --portal college
     healthCheckPath: /login
